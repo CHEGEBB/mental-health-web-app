@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.1478.0",
+    "axios": "^1.8.4",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

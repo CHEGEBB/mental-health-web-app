@@ -119,7 +119,7 @@ const resourcesData = [
     description: 'A simple yet powerful breathing exercise you can do anywhere to quickly reduce stress and create a sense of calm.',
     tags: ['stress relief', 'breathing', 'quick exercise'],
     recommended: ['stressed', 'anxious', 'overwhelmed', 'tense'],
-    videoUrl: 'https://example.com/videos/stress-relief',
+    videoUrl: '/assets/vid1.mp4',
   },
   {
     id: 'v2',
@@ -133,7 +133,7 @@ const resourcesData = [
     description: 'A perfect introduction to meditation for those new to the practice. Learn the basics of mindfulness in this gentle guided session.',
     tags: ['meditation', 'mindfulness', 'beginners'],
     recommended: ['anxious', 'stressed', 'overwhelmed', 'restless'],
-    videoUrl: 'https://example.com/videos/beginner-meditation',
+    videoUrl: '/assets/vid1.mp4',
   },
   {
     id: 'v3',
