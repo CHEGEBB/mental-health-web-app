@@ -9,7 +9,7 @@ import {
   ShieldAlert, Lock
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
-import { useAuth } from '../hooks/useAuth'; // Import the useAuth hook
+import { useAuth } from '../hooks/useAuth'; 
 
 const ProfilePage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
