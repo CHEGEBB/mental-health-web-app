@@ -33,7 +33,9 @@ import { useAuth } from '../hooks/useAuth';
 // Create User Auth Context
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+
+// Create a wrapper component for authentication logic
+function AuthWrapper({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,24 +43,16 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // In a real app, this would be a fetch call to your backend
-        // For demo purposes, we'll simulate a network request
         setLoading(true);
-        
-        // Simulate API call with a timeout
         setTimeout(() => {
-          // Mock user data
           const userData = {
             id: "user_123",
             name: "Alex Johnson",
             email: "alex@example.com",
-            // Add any other user data fields you need
           };
           
           setUser(userData);
           setLoading(false);
-          
-          // Store in local storage for persistence
           localStorage.setItem('user', JSON.stringify(userData));
         }, 1000);
       } catch (error) {
@@ -67,7 +61,6 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    // Check if we have a user in localStorage first
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -77,11 +70,9 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Logout function
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    // Redirect to login page if needed
   };
 
   return (
@@ -89,7 +80,7 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
 
 // Dashboard Component
@@ -238,6 +229,7 @@ const Dashboard = () => {
   } = userData;
 
   return (
+    <AuthWrapper>
     <div className="flex h-screen bg-slate-600 font-['Poppins']">
       
       {/* Sidebar Component */}
@@ -943,6 +935,7 @@ const Dashboard = () => {
         </main>
       </div>
     </div>
+    </AuthWrapper>
    
   );
 };
