@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { 
   Mic, MicOff, Smile, Frown, Meh, BookOpen, Tag, Clock, Calendar, 
   BarChart2, ChevronDown, ChevronUp, Sparkles, Save, 
@@ -9,12 +9,23 @@ import {
   Cloud, Droplet, Wind, Umbrella,
   Menu, Trash2, AlertCircle
 } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
-import Lottie from 'react-lottie';
-import writingAnimation from '../lottie/writing.json';
 import { format } from 'date-fns';
-import journalService from '../services/journalService';
 import toast from 'react-hot-toast';
+
+// Dynamically import components that use browser APIs
+const Sidebar = dynamic(() => import('../components/Sidebar'), { ssr: false });
+const Lottie = dynamic(() => import('react-lottie'), { ssr: false });
+
+// Import the Lottie animation only on the client
+const writingAnimation = typeof window !== 'undefined' 
+  ? require('../lottie/writing.json') 
+  : null;
+
+// Import the service only on the client
+let journalService;
+if (typeof window !== 'undefined') {
+  journalService = require('../services/journalService').default;
+}
 
 const JournalPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -32,7 +43,7 @@ const JournalPage = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
   const [weather, setWeather] = useState('sunny');
-  const [entryDate, setEntryDate] = useState(new Date());
+  const [entryDate, setEntryDate] = useState(null);
   const [saveStatus, setSaveStatus] = useState(null);
   const [currentEntryId, setCurrentEntryId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,9 +52,16 @@ const JournalPage = () => {
   const journalInputRef = useRef(null);
   const voiceRecognition = useRef(null);
 
-  // Load journal entries from backend
+  // Initialize date on client only
   useEffect(() => {
-    fetchJournalEntries();
+    setEntryDate(new Date());
+  }, []);
+
+  // Load journal entries from backend - only on client
+  useEffect(() => {
+    if (typeof window !== 'undefined' && journalService) {
+      fetchJournalEntries();
+    }
   }, []);
 
   const fetchJournalEntries = async () => {
@@ -126,7 +144,7 @@ const JournalPage = () => {
       setSaveStatus('saving');
       
       const entryData = {
-        title: journalTitle || `Journal Entry - ${format(entryDate, 'MMM dd, yyyy')}`,
+        title: journalTitle || `Journal Entry - ${entryDate ? format(entryDate, 'MMM dd, yyyy') : 'New Entry'}`,
         content: journalContent,
         mood: mood || 'neutral',
         tags: selectedTags,
@@ -244,7 +262,18 @@ const JournalPage = () => {
     }
   };
 
-  // Animation variants for Framer Motion
+  const getWeatherIcon = () => {
+    switch(weather) {
+      case 'sunny': return <Sun className="w-5 h-5 text-amber-400" />;
+      case 'cloudy': return <Cloud className="w-5 h-5 text-slate-400" />;
+      case 'rainy': return <Droplet className="w-5 h-5 text-blue-400" />;
+      case 'windy': return <Wind className="w-5 h-5 text-slate-400" />;
+      case 'stormy': return <Umbrella className="w-5 h-5 text-purple-400" />;
+      default: return <Sun className="w-5 h-5 text-amber-400" />;
+    }
+  };
+
+  // Animation variants for framer-motion
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
@@ -265,35 +294,24 @@ const JournalPage = () => {
     }
   };
 
-  // Lottie animation options
-  const defaultOptions = {
+  // Default options for Lottie animation
+  const defaultOptions = writingAnimation ? {
     loop: true,
     autoplay: true,
     animationData: writingAnimation,
     rendererSettings: {
       preserveAspectRatio: 'xMidYMid slice'
     }
-  };
-
-  const getWeatherIcon = () => {
-    switch(weather) {
-      case 'sunny': return <Sun className="w-5 h-5 text-amber-400" />;
-      case 'cloudy': return <Cloud className="w-5 h-5 text-slate-400" />;
-      case 'rainy': return <Droplet className="w-5 h-5 text-blue-400" />;
-      case 'windy': return <Wind className="w-5 h-5 text-slate-400" />;
-      case 'stormy': return <Umbrella className="w-5 h-5 text-purple-400" />;
-      default: return <Sun className="w-5 h-5 text-amber-400" />;
-    }
-  };
+  } : {};
 
   return (
     <div className="flex h-screen bg-slate-600 font-['Poppins']">
       {/* Sidebar Component */}
-      <Sidebar
+      {typeof window !== 'undefined' && <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
         activeRoute={activeRoute}
-      />
+      />}
 
       {/* Main Content */}
       <div className="flex flex-col flex-1 overflow-hidden">
@@ -351,136 +369,126 @@ const JournalPage = () => {
             </div>
           )}
 
-          <AnimatePresence>
-            {showHistory && (
-              <motion.div 
-                className="absolute top-0 right-0 z-10 w-full h-full overflow-y-auto shadow-xl bg-slate-700 md:w-96"
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              >
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-white">Journal History</h2>
-                    <button 
-                      className="text-slate-300 hover:text-slate-100"
-                      onClick={() => setShowHistory(false)}
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  
+          {/* Journal History Sidebar */}
+          {showHistory && (
+            <div 
+              className="absolute top-0 right-0 z-10 w-full h-full overflow-y-auto shadow-xl bg-slate-700 md:w-96"
+            >
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-white">Journal History</h2>
                   <button 
-                    className="flex items-center justify-center w-full px-4 py-2 mb-4 font-medium text-white transition-colors rounded-md bg-emerald-600 hover:bg-emerald-700"
-                    onClick={handleNewEntry}
+                    className="text-slate-300 hover:text-slate-100"
+                    onClick={() => setShowHistory(false)}
                   >
-                    <Edit3 className="w-4 h-4 mr-2" /> New Entry
+                    <X className="w-5 h-5" />
                   </button>
-
-                  {isLoading ? (
-                    <div className="flex justify-center p-8">
-                      <div className="w-8 h-8 border-4 rounded-full border-t-emerald-500 border-r-transparent border-b-emerald-500 border-l-transparent animate-spin"></div>
-                    </div>
-                  ) : journalHistory.length === 0 ? (
-                    <div className="p-6 text-center text-slate-400">
-                      <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p>No journal entries yet.</p>
-                      <p className="mt-2 text-sm">Start writing to see your entries here.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {journalHistory.map(entry => (
-                        <motion.div 
-                          key={entry._id}
-                          className="p-3 transition-colors rounded-lg cursor-pointer bg-slate-800 hover:bg-slate-600"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <h3 
-                              className="font-medium text-white cursor-pointer"
-                              onClick={() => loadJournalEntry(entry._id)}
-                            >{entry.title}</h3>
-                            <div className="flex items-center space-x-2">
-                              {entry.mood === 'happy' && <Smile className="w-4 h-4 text-emerald-400" />}
-                              {entry.mood === 'sad' && <Frown className="w-4 h-4 text-blue-400" />}
-                              {entry.mood === 'anxious' && <Meh className="w-4 h-4 rotate-180 text-amber-400" />}
-                              {entry.mood === 'neutral' && <Meh className="w-4 h-4 text-slate-400" />}
-                              {entry.mood === 'angry' && <Frown className="w-4 h-4 text-red-400" />}
-                              <button 
-                                className="p-1 text-slate-400 hover:text-red-400"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteEntry(entry._id);
-                                }}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                          <div 
-                            className="flex items-center mb-2 text-xs text-slate-400"
-                            onClick={() => loadJournalEntry(entry._id)}
-                          >
-                            <Calendar className="w-3 h-3 mr-1" /> 
-                            {format(new Date(entry.createdAt), 'yyyy-MM-dd')}
-                          </div>
-                          <p 
-                            className="text-sm text-slate-300 line-clamp-2"
-                            onClick={() => loadJournalEntry(entry._id)}
-                          >
-                            {entry.content}
-                          </p>
-                          {entry.tags && entry.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {entry.tags.slice(0, 3).map(tag => (
-                                <span 
-                                  key={tag} 
-                                  className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
-                                >
-                                  {getTagLabel(tag)}
-                                </span>
-                              ))}
-                              {entry.tags.length > 3 && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-600 text-slate-300">
-                                  +{entry.tags.length - 3}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                
+                <button 
+                  className="flex items-center justify-center w-full px-4 py-2 mb-4 font-medium text-white transition-colors rounded-md bg-emerald-600 hover:bg-emerald-700"
+                  onClick={handleNewEntry}
+                >
+                  <Edit3 className="w-4 h-4 mr-2" /> New Entry
+                </button>
+
+                {isLoading ? (
+                  <div className="flex justify-center p-8">
+                    <div className="w-8 h-8 border-4 rounded-full border-t-emerald-500 border-r-transparent border-b-emerald-500 border-l-transparent animate-spin"></div>
+                  </div>
+                ) : journalHistory.length === 0 ? (
+                  <div className="p-6 text-center text-slate-400">
+                    <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No journal entries yet.</p>
+                    <p className="mt-2 text-sm">Start writing to see your entries here.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {journalHistory.map(entry => (
+                      <div 
+                        key={entry._id}
+                        className="p-3 transition-colors rounded-lg cursor-pointer bg-slate-800 hover:bg-slate-600"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <h3 
+                            className="font-medium text-white cursor-pointer"
+                            onClick={() => loadJournalEntry(entry._id)}
+                          >{entry.title}</h3>
+                          <div className="flex items-center space-x-2">
+                            {entry.mood === 'happy' && <Smile className="w-4 h-4 text-emerald-400" />}
+                            {entry.mood === 'sad' && <Frown className="w-4 h-4 text-blue-400" />}
+                            {entry.mood === 'anxious' && <Meh className="w-4 h-4 rotate-180 text-amber-400" />}
+                            {entry.mood === 'neutral' && <Meh className="w-4 h-4 text-slate-400" />}
+                            {entry.mood === 'angry' && <Frown className="w-4 h-4 text-red-400" />}
+                            <button 
+                              className="p-1 text-slate-400 hover:text-red-400"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteEntry(entry._id);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div 
+                          className="flex items-center mb-2 text-xs text-slate-400"
+                          onClick={() => loadJournalEntry(entry._id)}
+                        >
+                          <Calendar className="w-3 h-3 mr-1" /> 
+                          {format(new Date(entry.createdAt), 'yyyy-MM-dd')}
+                        </div>
+                        <p 
+                          className="text-sm text-slate-300 line-clamp-2"
+                          onClick={() => loadJournalEntry(entry._id)}
+                        >
+                          {entry.content}
+                        </p>
+                        {entry.tags && entry.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {entry.tags.slice(0, 3).map(tag => (
+                              <span 
+                                key={tag} 
+                                className={`text-xs px-2 py-0.5 rounded-full ${getTagColor(tag)}`}
+                              >
+                                {getTagLabel(tag)}
+                              </span>
+                            ))}
+                            {entry.tags.length > 3 && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-600 text-slate-300">
+                                +{entry.tags.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col w-full h-full overflow-auto">
             {/* Journal Content */}
-            <motion.div 
+            <div 
               className="flex flex-col flex-1 p-4 sm:p-6 lg:p-8"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
-                  <motion.div
+                  <div
                     className="10 absolut"
-                    variants={itemVariants}
                   >
-                    <Lottie options={defaultOptions} height={100} width={100} />
-                  </motion.div>
-                  <motion.div 
-                    variants={itemVariants} 
+                    {typeof window !== 'undefined' && <Lottie options={defaultOptions} height={100} width={100} />}
+                  </div>
+                  <div 
                     className="ml-2"
                   >
                     <h2 className="text-xl font-semibold text-white">How are you feeling today?</h2>
-                    <p className="text-sm text-slate-400">{format(entryDate, 'EEEE, MMMM d, yyyy')}</p>
-                  </motion.div>
+                    <p className="text-sm text-slate-400">
+                      {entryDate ? format(entryDate, 'EEEE, MMMM d, yyyy') : 'Today'}
+                    </p>
+                  </div>
                 </div>
                 
                 <div className="items-center hidden sm:flex">
@@ -502,9 +510,8 @@ const JournalPage = () => {
               </div>
               
               {/* Mood Selection */}
-              <motion.div 
+              <div 
                 className="flex items-center justify-center p-4 mb-6 rounded-lg bg-slate-700"
-                variants={itemVariants}
               >
                 <button 
                   className={`flex flex-col items-center p-2 mx-2 rounded-lg hover:bg-slate-600 ${mood === 'happy' ? 'bg-slate-600 ring-2 ring-emerald-400' : ''}`}
@@ -541,12 +548,11 @@ const JournalPage = () => {
                   <Frown className={`w-8 h-8 ${mood === 'angry' ? 'text-red-400' : 'text-slate-300'}`} />
                   <span className={`mt-1 text-sm ${mood === 'angry' ? 'text-red-400' : 'text-slate-300'}`}>Angry</span>
                 </button>
-              </motion.div>
+              </div>
               
               {/* Journal Entry Fields */}
-              <motion.div 
+              <div 
                 className="flex-1 mb-6"
-                variants={itemVariants}
               >
                 <input
                   type="text"
@@ -580,12 +586,11 @@ const JournalPage = () => {
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </div>
               
               {/* Tags Section */}
-              <motion.div 
+              <div 
                 className="mb-6"
-                variants={itemVariants}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center">
@@ -627,127 +632,125 @@ const JournalPage = () => {
                   </div>
                 )}
                 
-                <AnimatePresence>
-                  {showTagMenu && (
-                    <motion.div 
-                      className="p-3 rounded-lg bg-slate-700"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className="flex flex-wrap gap-2">
-                        {availableTags.map(tag => (
-                          <motion.button 
-                            key={tag.id}
-                            className={`px-3 py-1 text-sm rounded-full ${
-                              selectedTags.includes(tag.id) 
-                                ? tag.color 
-                                : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
-                            }`}
-                            onClick={() => toggleTag(tag.id)}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                          >
-                            {tag.label}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-              
-              {/* Save Button - Mobile Only */}
-              <motion.div
-                className="flex justify-center mt-4 sm:hidden"
-                variants={itemVariants}
-              >
-                <button 
-                  className="flex items-center justify-center w-full px-4 py-3 font-medium text-white rounded-md bg-emerald-600 hover:bg-emerald-700"
-                  onClick={handleSaveJournal}
-                >
-                  <Save className="w-5 h-5 mr-2" /> 
-                  Save Journal Entry
-                </button>
-              </motion.div>
-            </motion.div>
-            
-            {/* AI Help Section */}
-            <AnimatePresence>
-              {showAIHelp && (
-                <motion.div 
-                  className="flex flex-col p-4 border-t sm:flex-row border-slate-600 bg-slate-700"
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 50 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                >
-                  <div className="flex-1 p-3 mr-4 overflow-y-auto rounded-lg bg-slate-800 max-h-60">
-                    {aiResponse ? (
-                      <div className="p-3 rounded-lg bg-slate-600">
-                        <div className="flex items-center mb-2">
-                          <Sparkles className="w-5 h-5 mr-2 text-amber-400" />
-                          <span className="font-medium text-white">AI Mental Health Assistant</span>
-                        </div>
-                        <p className="text-sm text-slate-300">{aiResponse}</p>
-                        <div className="flex items-center justify-end mt-3 space-x-2">
-                          <button className="p-1 text-slate-400 hover:text-slate-300">
-                            <ThumbsUp className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 text-slate-400 hover:text-slate-300">
-                            <ThumbsDown className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 text-slate-400 hover:text-slate-300">
-                            <MessageCircle className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-full">
-                        <HelpCircle className="w-10 h-10 mb-2 text-slate-500" />
-                        <p className="text-center text-slate-400">
-                          Ask the AI assistant for mental health insights, suggestions, or journaling prompts.
-                        </p>
-                      </div>
-                    )}
-                    
-                    {aiLoading && (
-                      <div className="flex items-center justify-center w-full h-8 mt-4">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 rounded-full animate-bounce bg-emerald-400"></div>
-                          <div className="w-2 h-2 rounded-full animate-bounce bg-emerald-400" style={{animationDelay: "0.1s"}}></div>
-                          <div className="w-2 h-2 rounded-full animate-bounce bg-emerald-400" style={{animationDelay: "0.2s"}}></div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex mt-3 sm:mt-0">
-                    <input
-                      type="text"
-                      className="flex-1 px-3 py-2 bg-slate-800 text-slate-200 rounded-l-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                      placeholder="Ask for suggestions..."
-                      value={aiPrompt}
-                      onChange={(e) => setAiPrompt(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleAIHelp()}
-                    />
-                    <button 
-                      className="px-4 py-2 text-white rounded-r-md bg-emerald-600 hover:bg-emerald-700"
-                      onClick={handleAIHelp}
-                      disabled={aiLoading}
-                    >
-                      <Send className="w-5 h-5" />
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </main>
+                {showTagMenu && (
+                  <div 
+                    className="p-3 rounded-lg bg-slate-700"
+                  >
+                    <div className="flex flex-wrap gap-2">
+                      {availableTags.map(tag => (
+                        <button 
+                          key={tag.id}
+className={`px-3 py-1 text-sm rounded-full ${selectedTags.includes(tag.id) ? tag.color : 'bg-slate-600 text-slate-300'} hover:opacity-80`}
+onClick={() => toggleTag(tag.id)}
+>
+  {tag.label}
+</button>
+))}
+</div>
+</div>
+)}
+</div>
+
+{/* Action Buttons for Mobile */}
+<div className="flex items-center justify-between sm:hidden">
+  <button 
+    className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-slate-700 text-slate-300 hover:bg-slate-600"
+    onClick={() => setShowAIHelp(!showAIHelp)}
+  >
+    <Sparkles className="w-4 h-4 mr-1" /> 
+    AI Help
+  </button>
+  <button 
+    className="flex items-center px-3 py-2 text-sm font-medium text-white rounded-md bg-emerald-600 hover:bg-emerald-700"
+    onClick={handleSaveJournal}
+  >
+    <Save className="w-4 h-4 mr-1" /> 
+    {currentEntryId ? 'Update Entry' : 'Save Entry'}
+  </button>
+</div>
+</div>
+
+{/* AI Help Panel */}
+{showAIHelp && (
+  <div className="p-4 border-t border-slate-700 bg-slate-800">
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-lg font-medium text-white">AI Journal Assistant</h3>
+      <button 
+        className="text-slate-300 hover:text-white"
+        onClick={() => setShowAIHelp(false)}
+      >
+        <X className="w-5 h-5" />
+      </button>
+    </div>
+    
+    <div className="mb-4">
+      <div className="flex mb-2">
+        <input
+          type="text"
+          placeholder="Ask for journaling prompts or mental health tips..."
+          className="flex-1 px-4 py-2 text-white rounded-l-md bg-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          value={aiPrompt}
+          onChange={(e) => setAiPrompt(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleAIHelp()}
+        />
+        <button 
+          className="px-4 py-2 text-white rounded-r-md bg-emerald-600 hover:bg-emerald-700"
+          onClick={handleAIHelp}
+        >
+          <Send className="w-5 h-5" />
+        </button>
+      </div>
+      
+      <div className="flex items-center text-xs text-slate-400">
+        <HelpCircle className="w-3 h-3 mr-1" />
+        <span>Try asking: "I'm feeling anxious, what should I focus on?"</span>
       </div>
     </div>
-  );
+    
+    {aiLoading ? (
+      <div className="flex items-center justify-center p-6 rounded-md bg-slate-700">
+        <div className="w-6 h-6 border-4 rounded-full border-t-emerald-500 border-r-transparent border-b-emerald-500 border-l-transparent animate-spin"></div>
+        <span className="ml-3 text-slate-300">Thinking...</span>
+      </div>
+    ) : aiResponse ? (
+      <div className="p-4 rounded-md bg-slate-700">
+        <div className="flex items-start mb-2">
+          <Sparkles className="w-5 h-5 mr-2 text-emerald-400" />
+          <span className="font-medium text-white">Journal Assistant</span>
+        </div>
+        <p className="text-slate-300">{aiResponse}</p>
+        
+        <div className="flex items-center justify-end mt-3 space-x-2">
+          <button className="p-1 text-slate-400 hover:text-emerald-400">
+            <ThumbsUp className="w-4 h-4" />
+          </button>
+          <button className="p-1 text-slate-400 hover:text-red-400">
+            <ThumbsDown className="w-4 h-4" />
+          </button>
+          <button className="p-1 text-slate-400 hover:text-blue-400">
+            <MessageCircle className="w-4 h-4" />
+          </button>
+          <button 
+            className="p-1 text-slate-400 hover:text-amber-400"
+            onClick={() => {
+              setJournalContent(prev => prev + '\n\n' + aiResponse);
+              setAiResponse('');
+              setAiPrompt('');
+              setShowAIHelp(false);
+            }}
+          >
+            <Edit3 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    ) : null}
+  </div>
+)}
+</div>
+</main>
+</div>
+</div>
+);
 };
 
 export default JournalPage;
