@@ -21,6 +21,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/components/CombinedCharts.jsx", "app/components/Sidebar.jsx", "app/dashboard/page.jsx", "app/auth/page.jsx", "app/profile/page.jsx", "app/resources/page.jsx", "app/page.jsx", "app/components/footer.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/components/CombinedCharts.jsx", "app/components/Sidebar.jsx", "app/dashboard/page.jsx", "app/auth/page.jsx", "app/profile/page.jsx", "app/resources/page.jsx", "app/page.jsx", "app/components/footer.jsx", "app/community/page.jsx"],
   "exclude": ["node_modules"]
 }

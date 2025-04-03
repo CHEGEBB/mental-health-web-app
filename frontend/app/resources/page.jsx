@@ -935,7 +935,7 @@ const resourcesData = [
                       <div className="flex flex-col items-center justify-center p-8 rounded-lg bg-slate-700">
                         <Search className="w-12 h-12 mb-4 text-slate-500" />
                         <h3 className="mb-2 text-lg font-medium text-white">No resources found</h3>
-                        <p className="mb-4 text-center text-slate-400">Try adjusting your search or filters to find what you're looking for.</p>
+                        <p className="mb-4 text-center text-slate-400">Try adjusting your search or filters to find what you&apo;re looking for.</p>
                         <button className="px-4 py-2 text-sm font-medium text-white rounded-md bg-emerald-600 hover:bg-emerald-700">
                           Reset Filters
                         </button>
@@ -1042,7 +1042,7 @@ const resourcesData = [
                         </div>
                         <div>
                           <h3 className="mb-1 font-medium text-white">Self-Compassion Practice</h3>
-                          <p className="text-sm text-slate-300">Treat yourself with the same kindness you'd offer to a good friend. Self-criticism rarely leads to positive change.</p>
+                          <p className="text-sm text-slate-300">Treat yourself with the same kindness you&apo;d offer to a good friend. Self-criticism rarely leads to positive change.</p>
                         </div>
                       </div>
                       <div className="flex">
@@ -1060,7 +1060,7 @@ const resourcesData = [
                         </div>
                         <div>
                           <h3 className="mb-1 font-medium text-white">Prioritize Your Sleep</h3>
-                          <p className="text-sm text-slate-300">Sleep isn't a luxury—it's essential maintenance for your brain. Aim for 7-9 hours of quality sleep each night.</p>
+                          <p className="text-sm text-slate-300">Sleep isn&apo;t a luxury—it&apo;s essential maintenance for your brain. Aim for 7-9 hours of quality sleep each night.</p>
                         </div>
                       </div>
                     </div>
@@ -1122,7 +1122,7 @@ const resourcesData = [
                       <span className="px-2 py-1 text-xs font-medium text-blue-200 rounded-full bg-blue-500/30">New</span>
                     </div>
                     <h3 className="mb-3 text-lg font-medium text-white">7 Days of Gratitude Practice</h3>
-                    <p className="mb-4 text-slate-300">Research shows that regularly practicing gratitude can significantly improve mental wellbeing. Take just 5 minutes each day to write down three things you're grateful for.</p>
+                    <p className="mb-4 text-slate-300">Research shows that regularly practicing gratitude can significantly improve mental wellbeing. Take just 5 minutes each day to write down three things you&apo;re grateful for.</p>
                     <div className="p-3 mb-4 rounded-md bg-slate-800/50">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-white">Progress</span>
@@ -1376,10 +1376,10 @@ const resourcesData = [
                       <div className="p-4 mb-6 border rounded-lg border-slate-700">
                         <h3 className="mb-3 font-medium text-white">How To Use This Audio</h3>
                         <ul className="pl-5 mb-3 space-y-2 text-sm list-disc text-slate-300">
-                          <li>Find a quiet, comfortable place where you won't be disturbed</li>
+                          <li>Find a quiet, comfortable place where you won&apo;t be disturbed</li>
                           <li>You can either sit or lie down in a relaxed position</li>
                           <li>Consider using headphones for the best experience</li>
-                          <li>Follow the guidance and remember there's no "right way" to do this</li>
+                          <li>Follow the guidance and remember there&apo;s no right way to do this</li>
                         </ul>
                       </div>
                       

@@ -512,7 +512,7 @@ const TherapistsPage = () => {
                             </div>
                             <h2 className="mb-2 text-xl font-bold text-white">Appointment Confirmed!</h2>
                             <p className="mb-6 text-center text-slate-300">
-                              You're scheduled with {selectedTherapist.name} on {format(bookingState.selectedDate, 'EEEE, MMMM d, yyyy')} at {bookingState.selectedTime}.
+                              You&apo;re scheduled with {selectedTherapist.name} on {format(bookingState.selectedDate, 'EEEE, MMMM d, yyyy')} at {bookingState.selectedTime}.
                             </p>
                             <div className="p-4 mb-6 rounded-lg bg-slate-700">
                               <div className="flex items-center mb-3">
@@ -530,7 +530,7 @@ const TherapistsPage = () => {
                               </div>
                               <div className="px-3 py-2 text-sm rounded bg-slate-600 text-slate-300">
                                 <div className="mb-1 font-medium text-white">How to prepare:</div>
-                                <p>Find a quiet, private space for your session. Have a notebook ready to write down insights. Think about what you'd like to focus on during your time together.</p>
+                                <p>Find a quiet, private space for your session. Have a notebook ready to write down insights. Think about what you&apo;d like to focus on during your time together.</p>
                               </div>
                             </div>
                             <div className="flex space-x-3">
