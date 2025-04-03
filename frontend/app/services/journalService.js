@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create an axios instance with the base URL
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api'
+  baseURL: 'https://mental-health-web-app.onrender.com/api'
 });
 
 // Add token to requests

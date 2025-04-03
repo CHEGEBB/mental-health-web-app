@@ -147,7 +147,7 @@ const resourcesData = [
     description: 'A gentle, accessible yoga practice designed specifically to help calm the nervous system and reduce feelings of anxiety.',
     tags: ['yoga', 'anxiety relief', 'gentle exercise'],
     recommended: ['anxious', 'tense', 'stressed', 'restless'],
-    videoUrl: 'https://example.com/videos/anxiety-yoga',
+    videoUrl: '/assets/vid1.mp4',
   },
   {
     id: 'v4',
@@ -161,7 +161,7 @@ const resourcesData = [
     description: 'A fascinating look at the neuroscience behind happiness and practical ways to increase your happiness based on scientific research.',
     tags: ['happiness', 'neuroscience', 'positive psychology'],
     recommended: ['sad', 'neutral', 'unmotivated', 'curious'],
-    videoUrl: 'https://example.com/videos/science-happiness',
+    videoUrl: '/assets/vid1.mp4',
   },
   
   // Audio

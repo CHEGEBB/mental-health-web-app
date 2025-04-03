@@ -2,7 +2,7 @@
 // services/api.js
 "use client";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mental-health-web-app.onrender.com';
 
 // Helper for making authenticated requests
 export const fetchWithAuth = async (endpoint, options = {}) => {
