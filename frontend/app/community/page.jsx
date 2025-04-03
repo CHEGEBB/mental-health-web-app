@@ -630,7 +630,7 @@ const CommunityPage = () => {
                       <MessageSquare className="w-12 h-12 mb-3 text-slate-500" />
                       <h3 className="mb-2 text-lg font-medium text-white">No posts found</h3>
                       <p className="mb-4 text-center text-slate-400">
-                        We couldn&apo;t find any posts matching your current filters.
+                        We couldnt find any posts matching your current filters.
                       </p>
                       <button 
                         className="px-4 py-2 font-medium text-white rounded-md bg-emerald-600 hover:bg-emerald-700"
@@ -712,7 +712,7 @@ const CommunityPage = () => {
                       <Users className="w-12 h-12 mb-3 text-slate-500" />
                       <h3 className="mb-2 text-lg font-medium text-white">No groups found</h3>
                       <p className="mb-4 text-center text-slate-400">
-                        We couldn&apo;t find any support groups matching your current filters.
+                        We couldnt find any support groups matching your current filters.
                       </p>
                       <button 
                         className="px-4 py-2 font-medium text-white rounded-md bg-emerald-600 hover:bg-emerald-700"

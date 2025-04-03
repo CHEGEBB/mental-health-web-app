@@ -607,7 +607,7 @@ const MoodTracker = () => {
                     </div>
                     <div>
                       <p className="text-lg font-medium">
-                        You&apo;re feeling <span className="font-semibold">{getMoodLabel(quizResult?.mood)}</span> today.
+                        You are feeling <span className="font-semibold">{getMoodLabel(quizResult?.mood)}</span> today.
                       </p>
                       <p className="text-sm text-slate-300">Score: {quizResult?.score}/5.0</p>
                     </div>

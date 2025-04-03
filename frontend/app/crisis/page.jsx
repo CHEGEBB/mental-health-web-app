@@ -525,9 +525,9 @@ const CrisisResourcesPage = () => {
                     <MessageSquare className="w-8 h-8 text-emerald-400" />
                   </div>
                   <div>
-                    <h3 className="mb-2 text-lg font-medium text-white">You&apo;re Not Alone</h3>
+                    <h3 className="mb-2 text-lg font-medium text-white">You are Not Alone</h3>
                     <p className="text-slate-300">
-                      Connecting with others who understand what you&apo;re going through can be incredibly helpful. 
+                      Connecting with others who understand what you are going through can be incredibly helpful. 
                       In our support community, you can share experiences, find advice, and build meaningful connections.
                     </p>
                     <div className="flex flex-wrap gap-3 mt-4">
@@ -590,7 +590,7 @@ const CrisisResourcesPage = () => {
               <div className="p-5 rounded-lg bg-slate-700">
                 <h3 className="mb-3 text-lg font-medium text-white">When to Seek Help</h3>
                 <p className="mb-4 text-slate-300">
-                  It&apo;s important to reach out for professional help if you or someone you know is experiencing:
+                  It is important to reach out for professional help if you or someone you know is experiencing:
                 </p>
                 <ul className="mb-6 space-y-2 text-slate-300">
                   <li className="flex items-start">
@@ -599,7 +599,7 @@ const CrisisResourcesPage = () => {
                   </li>
                   <li className="flex items-start">
                     <AlertTriangle className="w-5 h-5 mr-2 text-amber-500 shrink-0" />
-                    <span>Overwhelming feelings of hopelessness or despair that won&apo;t go away</span>
+                    <span>Overwhelming feelings of hopelessness or despair that wont go away</span>
                   </li>
                   <li className="flex items-start">
                     <AlertTriangle className="w-5 h-5 mr-2 text-amber-500 shrink-0" />
@@ -613,7 +613,7 @@ const CrisisResourcesPage = () => {
 
                 <h3 className="mb-3 text-lg font-medium text-white">Supporting Someone in Crisis</h3>
                 <p className="mb-4 text-slate-300">
-                  If you&apo;re helping someone who&apo;s experiencing a mental health crisis:
+                  If you are helping someone who is experiencing a mental health crisis:
                 </p>
                 <ul className="space-y-2 text-slate-300">
                   <li className="flex items-start">
