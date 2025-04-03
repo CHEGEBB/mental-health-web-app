@@ -703,7 +703,7 @@ onClick={() => toggleTag(tag.id)}
       
       <div className="flex items-center text-xs text-slate-400">
         <HelpCircle className="w-3 h-3 mr-1" />
-        <span>Try asking: "I'm feeling anxious, what should I focus on?"</span>
+        <span>Try asking: I am feeling anxious, what should I focus on?</span>
       </div>
     </div>
     
