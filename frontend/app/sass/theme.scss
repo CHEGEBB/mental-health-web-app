@@ -1,0 +1,103 @@
+/* app/sass/theme.scss */
+:root {
+    /* Default theme variables */
+    --color-background: #1e293b; /* slate-800 */
+    --color-foreground: #f8fafc; /* slate-50 */
+    --color-card: #334155; /* slate-700 */
+    --color-card-hover: #475569; /* slate-600 */
+    --color-border: #475569; /* slate-600 */
+    --color-input: #1e293b; /* slate-800 */
+    --color-accent: #10b981; /* emerald-500 */
+    --color-accent-hover: #059669; /* emerald-600 */
+    --color-accent-light: #34d399; /* emerald-400 */
+    --color-text-primary: #f8fafc; /* slate-50 */
+    --color-text-secondary: #cbd5e1; /* slate-300 */
+    --color-text-tertiary: #94a3b8; /* slate-400 */
+  }
+  
+  /* Light theme overrides */
+  body.light-theme {
+    --color-background: #f8fafc; /* slate-50 */
+    --color-foreground: #0f172a; /* slate-900 */
+    --color-card: #ffffff; /* white */
+    --color-card-hover: #f1f5f9; /* slate-100 */
+    --color-border: #e2e8f0; /* slate-200 */
+    --color-input: #ffffff; /* white */
+    --color-text-primary: #0f172a; /* slate-900 */
+    --color-text-secondary: #334155; /* slate-700 */
+    --color-text-tertiary: #64748b; /* slate-500 */
+  }
+  
+  /* Accent color themes */
+  body.theme-emerald {
+    --color-accent: #10b981; /* emerald-500 */
+    --color-accent-hover: #059669; /* emerald-600 */
+    --color-accent-light: #34d399; /* emerald-400 */
+  }
+  
+  body.theme-ocean {
+    --color-accent: #3b82f6; /* blue-500 */
+    --color-accent-hover: #2563eb; /* blue-600 */
+    --color-accent-light: #60a5fa; /* blue-400 */
+  }
+  
+  body.theme-lavender {
+    --color-accent: #8b5cf6; /* purple-500 */
+    --color-accent-hover: #7c3aed; /* purple-600 */
+    --color-accent-light: #a78bfa; /* purple-400 */
+  }
+  
+  body.theme-sunset {
+    --color-accent: #f59e0b; /* amber-500 */
+    --color-accent-hover: #d97706; /* amber-600 */
+    --color-accent-light: #fbbf24; /* amber-400 */
+  }
+  
+  body.theme-slate {
+    --color-accent: #64748b; /* slate-500 */
+    --color-accent-hover: #475569; /* slate-600 */
+    --color-accent-light: #94a3b8; /* slate-400 */
+  }
+  
+  /* Apply theme variables throughout the app */
+  .bg-primary {
+    background-color: var(--color-background);
+  }
+  
+  .bg-card {
+    background-color: var(--color-card);
+  }
+  
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+  
+  .bg-accent-hover:hover {
+    background-color: var(--color-accent-hover);
+  }
+  
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+  
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+  
+  .text-tertiary {
+    color: var(--color-text-tertiary);
+  }
+  
+  .text-accent {
+    color: var(--color-accent);
+  }
+  
+  .border-accent {
+    border-color: var(--color-accent);
+  }
+  
+  .ring-accent {
+    --tw-ring-color: var(--color-accent);
+  }
+  
+  /* Add more utility classes as needed */
