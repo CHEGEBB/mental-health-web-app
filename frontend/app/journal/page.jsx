@@ -14,12 +14,7 @@ import toast from 'react-hot-toast';
 
 // Dynamically import components that use browser APIs
 const Sidebar = dynamic(() => import('../components/Sidebar'), { ssr: false });
-const Lottie = dynamic(() => import('react-lottie'), { ssr: false });
 
-// Import the Lottie animation only on the client
-const writingAnimation = typeof window !== 'undefined' 
-  ? require('../lottie/writing.json') 
-  : null;
 
 // Import the service only on the client
 let journalService;
@@ -294,15 +289,7 @@ const JournalPage = () => {
     }
   };
 
-  // Default options for Lottie animation
-  const defaultOptions = writingAnimation ? {
-    loop: true,
-    autoplay: true,
-    animationData: writingAnimation,
-    rendererSettings: {
-      preserveAspectRatio: 'xMidYMid slice'
-    }
-  } : {};
+
 
   return (
     <div className="flex h-screen bg-slate-600 font-['Poppins']">
@@ -479,7 +466,6 @@ const JournalPage = () => {
                   <div
                     className="10 absolut"
                   >
-                    {typeof window !== 'undefined' && <Lottie options={defaultOptions} height={100} width={100} />}
                   </div>
                   <div 
                     className="ml-2"
