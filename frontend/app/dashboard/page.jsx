@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { 
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
@@ -25,17 +26,22 @@ import {
   User,
   LogOut
 } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
-import Lottie from 'react-lottie';
-import peopleWavingAnimation from '../lottie/wave.json';
-import { useAuth } from '../hooks/useAuth';
+import dynamic from 'next/dynamic';
 
 // Create User Auth Context
 const AuthContext = createContext();
 
+// Custom hook for using auth context
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
 
 // Create a wrapper component for authentication logic
-function AuthWrapper({ children }) {
+function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -61,18 +67,23 @@ function AuthWrapper({ children }) {
       }
     };
 
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      setLoading(false);
-    } else {
-      fetchUser();
+    // Client-side only code
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        setLoading(false);
+      } else {
+        fetchUser();
+      }
     }
   }, []);
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user');
+    }
   };
 
   return (
@@ -82,6 +93,123 @@ function AuthWrapper({ children }) {
   );
 }
 
+// Sidebar Component
+const Sidebar = ({ sidebarOpen, setSidebarOpen, activeRoute, userName }) => {
+  return (
+    <>
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-20 bg-black bg-opacity-50 lg:hidden" 
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
+      
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-30 w-64 transition-transform duration-300 transform bg-slate-900 lg:translate-x-0 lg:static lg:inset-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex flex-col h-full">
+          {/* Logo and close button */}
+          <div className="flex items-center justify-between px-4 py-5">
+            <div className="flex items-center">
+              <div className="p-2 mr-2 rounded-full bg-emerald-500">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-xl font-bold text-white">MindfulTrack</span>
+            </div>
+            <button 
+              onClick={() => setSidebarOpen(false)}
+              className="p-1 rounded-md text-slate-400 hover:text-slate-200 lg:hidden"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-2 mt-5 space-y-1">
+            <a 
+              href="/dashboard" 
+              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg ${
+                activeRoute === 'dashboard' 
+                  ? 'bg-slate-800 text-white' 
+                  : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+              }`}
+            >
+              <BarChart2 className="w-5 h-5 mr-3" />
+              Dashboard
+            </a>
+            <a 
+              href="/journal" 
+              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg ${
+                activeRoute === 'journal' 
+                  ? 'bg-slate-800 text-white' 
+                  : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+              }`}
+            >
+              <FileText className="w-5 h-5 mr-3" />
+              Journal
+            </a>
+            <a 
+              href="#" 
+              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg ${
+                activeRoute === 'exercises' 
+                  ? 'bg-slate-800 text-white' 
+                  : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+              }`}
+            >
+              <Brain className="w-5 h-5 mr-3" />
+              Mental Exercises
+            </a>
+            <a 
+              href="#" 
+              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg ${
+                activeRoute === 'appointments' 
+                  ? 'bg-slate-800 text-white' 
+                  : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+              }`}
+            >
+              <Calendar className="w-5 h-5 mr-3" />
+              Appointments
+            </a>
+            <a 
+              href="#" 
+              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg ${
+                activeRoute === 'progress' 
+                  ? 'bg-slate-800 text-white' 
+                  : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+              }`}
+            >
+              <TrendingUp className="w-5 h-5 mr-3" />
+              Progress
+            </a>
+          </nav>
+
+          {/* User profile */}
+          <div className="p-4 border-t border-slate-800">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-10 h-10 mr-3 rounded-full bg-slate-700">
+                <span className="text-lg font-medium text-white">{userName ? userName.charAt(0) : 'U'}</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">{userName || 'User'}</p>
+                <p className="text-xs text-slate-400">View profile</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+// Dynamically import Lottie to prevent SSR issues
+const Lottie = dynamic(() => import('react-lottie'), {
+  ssr: false,
+  loading: () => <div className="w-32 h-32 rounded-full bg-slate-700 animate-pulse"></div>,
+});
 
 // Dashboard Component
 const Dashboard = () => {
@@ -89,9 +217,185 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState('overview');
   const [activeRoute, setActiveRoute] = useState('dashboard');
-  const { user, loading, logout } = useAuth();
   const [userData, setUserData] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
+  const [peopleWavingAnimation, setPeopleWavingAnimation] = useState(null);
+  const { user, loading, logout } = useContext(AuthContext);
+
+  // Load animation data
+  useEffect(() => {
+    import('../lottie/wave.json')
+      .then(animationData => {
+        setPeopleWavingAnimation(animationData.default);
+      })
+      .catch(err => {
+        console.error("Failed to load animation:", err);
+        // Fallback animation data if needed
+        setPeopleWavingAnimation({
+          v: "5.5.7",
+          fr: 30,
+          ip: 0,
+          op: 60,
+          w: 200,
+          h: 200,
+          nm: "Simple Wave",
+          ddd: 0,
+          assets: [],
+          layers: [
+            {
+              ddd: 0,
+              ind: 1,
+              ty: 4,
+              nm: "Wave",
+              sr: 1,
+              ks: {
+                o: { a: 0, k: 100, ix: 11 },
+                r: { a: 0, k: 0, ix: 10 },
+                p: { a: 0, k: [100, 100, 0], ix: 2 },
+                a: { a: 0, k: [0, 0, 0], ix: 1 },
+                s: { a: 0, k: [100, 100, 100], ix: 6 }
+              },
+              ao: 0,
+              shapes: [
+                {
+                  ty: "gr",
+                  it: [
+                    {
+                      ind: 0,
+                      ty: "sh",
+                      ix: 1,
+                      ks: {
+                        a: 1,
+                        k: [
+                          {
+                            i: { x: 0.5, y: 1 },
+                            o: { x: 0.5, y: 0 },
+                            t: 0,
+                            s: [
+                              {
+                                i: [
+                                  [0, 0],
+                                  [25, -20],
+                                  [25, 20],
+                                  [25, -20],
+                                  [25, 20]
+                                ],
+                                o: [
+                                  [0, 0],
+                                  [25, 20],
+                                  [25, -20],
+                                  [25, 20],
+                                  [25, -20]
+                                ],
+                                v: [
+                                  [-100, 0],
+                                  [-50, 0],
+                                  [0, 0],
+                                  [50, 0],
+                                  [100, 0]
+                                ],
+                                c: false
+                              }
+                            ]
+                          },
+                          {
+                            t: 30,
+                            s: [
+                              {
+                                i: [
+                                  [0, 0],
+                                  [25, 20],
+                                  [25, -20],
+                                  [25, 20],
+                                  [25, -20]
+                                ],
+                                o: [
+                                  [0, 0],
+                                  [25, -20],
+                                  [25, 20],
+                                  [25, -20],
+                                  [25, 20]
+                                ],
+                                v: [
+                                  [-100, 0],
+                                  [-50, 0],
+                                  [0, 0],
+                                  [50, 0],
+                                  [100, 0]
+                                ],
+                                c: false
+                              }
+                            ]
+                          },
+                          {
+                            t: 60,
+                            s: [
+                              {
+                                i: [
+                                  [0, 0],
+                                  [25, -20],
+                                  [25, 20],
+                                  [25, -20],
+                                  [25, 20]
+                                ],
+                                o: [
+                                  [0, 0],
+                                  [25, 20],
+                                  [25, -20],
+                                  [25, 20],
+                                  [25, -20]
+                                ],
+                                v: [
+                                  [-100, 0],
+                                  [-50, 0],
+                                  [0, 0],
+                                  [50, 0],
+                                  [100, 0]
+                                ],
+                                c: false
+                              }
+                            ]
+                          }
+                        ],
+                        ix: 2
+                      },
+                      nm: "Path 1",
+                      mn: "ADBE Vector Shape - Group",
+                      hd: false
+                    },
+                    {
+                      ty: "st",
+                      c: { a: 0, k: [0.063, 0.718, 0.502, 1], ix: 3 },
+                      o: { a: 0, k: 100, ix: 4 },
+                      w: { a: 0, k: 10, ix: 5 },
+                      lc: 2,
+                      lj: 1,
+                      ml: 4,
+                      bm: 0,
+                      nm: "Stroke 1",
+                      mn: "ADBE Vector Graphic - Stroke",
+                      hd: false
+                    }
+                  ],
+                  nm: "Wave Group",
+                  np: 2,
+                  cix: 2,
+                  bm: 0,
+                  ix: 1,
+                  mn: "ADBE Vector Group",
+                  hd: false
+                }
+              ],
+              ip: 0,
+              op: 60,
+              st: 0,
+              bm: 0
+            }
+          ],
+          markers: []
+        });
+      });
+  }, []);
 
   // Set greeting based on time of day
   useEffect(() => {
@@ -185,14 +489,14 @@ const Dashboard = () => {
   }, [user]);
 
   // Lottie animation options
-  const defaultOptions = {
+  const defaultOptions = peopleWavingAnimation ? {
     loop: true,
     autoplay: true,
     animationData: peopleWavingAnimation,
     rendererSettings: {
       preserveAspectRatio: 'xMidYMid slice'
     }
-  };
+  } : null;
 
   // Loading states
   if (loading || !user) {
@@ -229,7 +533,6 @@ const Dashboard = () => {
   } = userData;
 
   return (
-    <AuthWrapper>
     <div className="flex h-screen bg-slate-600 font-['Poppins']">
       
       {/* Sidebar Component */}
@@ -296,8 +599,14 @@ const Dashboard = () => {
                 <p className="mt-1 text-slate-300">Here&apos;s an overview of your mental wellness journey</p>
               </div>
               <div className="w-32 h-32 mb-12 mr-10 md:mr-80 sm:-mt-40 md:-mt-20">
-                {/* Replace Brain icon with Lottie animation */}
-                <Lottie options={defaultOptions} height={200} width={200} />
+                {/* Replace Brain icon with Lottie animation if loaded */}
+                {defaultOptions ? (
+                  <Lottie options={defaultOptions} height={200} width={200} />
+                ) : (
+                  <div className="flex items-center justify-center w-32 h-32 rounded-full bg-emerald-800 animate-pulse">
+                    <Brain className="w-16 h-16 text-emerald-300" />
+                  </div>
+                )}
               </div>
               
             </div>
@@ -935,9 +1244,16 @@ const Dashboard = () => {
         </main>
       </div>
     </div>
-    </AuthWrapper>
-   
   );
 };
 
-export default Dashboard;
+// Dashboard page component that uses the Auth Provider
+const DashboardPage = () => {
+  return (
+    <AuthProvider>
+      <Dashboard />
+    </AuthProvider>
+  );
+};
+
+export default DashboardPage;
