@@ -31,15 +31,6 @@ import dynamic from 'next/dynamic';
 // Create User Auth Context
 const AuthContext = createContext();
 
-// Custom hook for using auth context
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
-
 // Create a wrapper component for authentication logic
 function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -220,7 +211,8 @@ const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [peopleWavingAnimation, setPeopleWavingAnimation] = useState(null);
-  const { user, loading, logout } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const { user, loading, logout } = auth || { user: null, loading: true, logout: () => {} };
 
   // Load animation data
   useEffect(() => {
