@@ -85,12 +85,6 @@ function AuthProvider({ children }) {
   );
 }
 
-// Dynamically import Lottie to prevent SSR issues
-const Lottie = dynamic(() => import('react-lottie'), {
-  ssr: false,
-  loading: () => <div className="w-32 h-32 rounded-full bg-slate-700 animate-pulse"></div>,
-});
-
 // Dashboard Component
 const Dashboard = () => {
   const [greeting, setGreeting] = useState("");
@@ -480,14 +474,6 @@ const Dashboard = () => {
                 <p className="mt-1 text-slate-300">Here&apos;s an overview of your mental wellness journey</p>
               </div>
               <div className="w-32 h-32 mb-12 mr-10 md:mr-80 sm:-mt-40 md:-mt-20">
-                {/* Replace Brain icon with Lottie animation if loaded */}
-                {defaultOptions ? (
-                  <Lottie options={defaultOptions} height={200} width={200} />
-                ) : (
-                  <div className="flex items-center justify-center w-32 h-32 rounded-full bg-emerald-800 animate-pulse">
-                    <Brain className="w-16 h-16 text-emerald-300" />
-                  </div>
-                )}
               </div>
               
             </div>
