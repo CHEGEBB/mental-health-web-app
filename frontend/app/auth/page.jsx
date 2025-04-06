@@ -49,6 +49,16 @@ export default function AuthScreen() {
     return () => clearInterval(quoteInterval);
   }, [bgImages, cycleQuotes]);
 
+  // Add effect to check if user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    
+    if (token && user) {
+      router.push("/dashboard");
+    }
+  }, [router]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -77,9 +87,9 @@ export default function AuthScreen() {
         }, 2000);
         
       } else {
-        // Optimize login by using a promise with timeout to prevent UI freeze
+        // Fix login params - use email field as API expects
         const loginPromise = authService.login({
-          email: username,
+          email: username, // This field should accept either email or username
           password
         });
         
@@ -90,18 +100,23 @@ export default function AuthScreen() {
         
         response = await Promise.race([loginPromise, timeoutPromise]);
         
-        // Store token and user info - use sessionStorage for better security
-        sessionStorage.setItem('token', response.token);
-        sessionStorage.setItem('user', JSON.stringify({
+        if (!response || !response.token) {
+          throw new Error("Invalid response from server");
+        }
+        
+        // Store token and user info - use localStorage for persistence between sessions
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify({
           id: response._id,
           name: response.name,
           email: response.email
         }));
 
-        // Use shallow routing for faster navigation
-        router.push("/dashboard", { shallow: true });
+        // Use router.push without shallow for complete page refresh
+        router.push("/dashboard");
       }
     } catch (err) {
+      console.error("Auth error:", err);
       setError(err.message || "Authentication failed. Please try again.");
     } finally {
       setIsLoading(false);
@@ -241,10 +256,10 @@ export default function AuthScreen() {
 
                   <div>
                     <label className="block mb-1 text-sm font-medium text-slate-300">
-                      {authMode === "signup" ? "Username" : "Email or Username"}
+                      {authMode === "signup" ? "Username" : "Email"}
                     </label>
                     <input
-                      type="text"
+                      type={authMode === "signin" ? "email" : "text"}
                       required
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
@@ -385,7 +400,7 @@ export default function AuthScreen() {
                   {mentalHealthQuotes[currentQuote]}
                 </motion.h2>
                 <p className="max-w-md mx-auto text-lg text-emerald-100">
-                  Join thousands of people who have found peace and balance with MindHarmony.
+                  Join thousands of people who have found peace and balance with MindHarmony..
                 </p>
               </motion.div>
             </AnimatePresence>
