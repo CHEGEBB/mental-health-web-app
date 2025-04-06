@@ -1214,8 +1214,8 @@ const aiResources = {
                   <div className="flex items-center mb-6 text-xs text-indigo-200">
                     <HelpCircle className="w-3 h-3 mr-1" />
                     <span>
-                      Try statements like: "I'm feeling anxious about work
-                      deadlines" or "I feel sad and unmotivated today"
+                      Try statements like: &quot;I am feeling anxious about work
+                      deadlines&quot; or &quot;I feel sad and unmotivated today&quot;
                     </span>
                   </div>
 
@@ -1401,7 +1401,7 @@ const aiResources = {
                         AI Mental Health Analysis
                       </h3>
                       <p>
-                        Describe how you're feeling to receive personalized
+                        Describe how you are feeling to receive personalized
                         insights and resources.
                       </p>
                       <p className="mt-3 text-sm text-indigo-200">

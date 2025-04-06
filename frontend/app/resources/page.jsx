@@ -43,6 +43,7 @@ import {
   Play,
   Pause,
   MessageSquare,
+  ExternalLink,
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Image from "next/image";
@@ -1789,7 +1790,7 @@ const ResourcesPage = () => {
                           </li>
                         </ul>
                         <p className="text-sm text-slate-400">
-                          Note: This is not a diagnostic tool. If you're
+                          Note: This is not a diagnostic tool. If you are
                           experiencing severe distress, please seek professional
                           help.
                         </p>
@@ -1887,7 +1888,7 @@ const ResourcesPage = () => {
                         Your Personalized Recommendations
                       </h2>
                       <p className="mb-6 text-center text-slate-300">
-                        Based on your responses, we've selected resources that
+                        Based on your responses, we have selected resources that
                         may help you most.
                       </p>
 
@@ -2178,7 +2179,7 @@ const ResourcesPage = () => {
                     </h3>
                   </div>
                   <p className="mb-3 text-sm text-slate-300">
-                    Try the "3-3-3 Rule" for anxiety: Name 3 things you see, 3
+                    Try the &quot;3-3-3 Rule&quot; for anxiety: Name 3 things you see, 3
                     sounds you hear, and move 3 parts of your body.
                   </p>
                   <div className="flex justify-end">
