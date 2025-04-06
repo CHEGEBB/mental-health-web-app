@@ -1,4 +1,3 @@
-// First, create an API service file
 // services/api.js
 "use client";
 

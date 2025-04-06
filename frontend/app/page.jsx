@@ -149,6 +149,9 @@ export default function Home() {
   const aboutY = useTransform(scrollY, [500, 1500], [0, -150]);
   const contactY = useTransform(scrollY, [1000, 2000], [0, -150]);
 
+  // State for particles - initialized empty
+  const [particles, setParticles] = useState([]);
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -156,6 +159,17 @@ export default function Home() {
     
     handleResize();
     window.addEventListener('resize', handleResize);
+    
+    // Generate particles only on client side
+    const generatedParticles = Array.from({ length: 20 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 8 + 2,
+      duration: Math.random() * 20 + 10
+    }));
+    
+    setParticles(generatedParticles);
     
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -188,15 +202,6 @@ export default function Home() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Floating particles for hero section
-  const particles = Array.from({ length: 20 }).map((_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 8 + 2,
-    duration: Math.random() * 20 + 10
-  }));
-
   return (
     <main ref={mainRef} className="w-full space-y-0 overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100">
       {/* Header/Hero Section with Advanced Parallax Effect */}
@@ -215,7 +220,7 @@ export default function Home() {
           style={{ opacity: headerOpacity }}
         ></motion.div>
         
-        {/* Floating Particles */}
+        {/* Floating Particles - Now rendered only after client-side hydration */}
         {particles.map(particle => (
           <motion.div
             key={particle.id}
