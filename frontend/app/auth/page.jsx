@@ -8,6 +8,7 @@ import Head from "next/head";
 export default function AuthScreen() {
   const router = useRouter();
   const [authMode, setAuthMode] = useState("signup");
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +18,10 @@ export default function AuthScreen() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    feedback: ""
+  });
 
   const mentalHealthQuotes = [
     "Your mental health is a priority. Your happiness is essential.",
@@ -53,11 +58,53 @@ export default function AuthScreen() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
+    const adminToken = localStorage.getItem('adminToken');
     
     if (token && user) {
       router.push("/dashboard");
+    } else if (adminToken) {
+      router.push("/admin");
     }
   }, [router]);
+
+  // Password strength checker
+  const checkPasswordStrength = (pass) => {
+    if (!pass) {
+      setPasswordStrength({ score: 0, feedback: "" });
+      return;
+    }
+
+    // Basic strength checks
+    let score = 0;
+    let feedback = "";
+
+    if (pass.length < 8) {
+      feedback = "Password is too short";
+    } else {
+      score += 1;
+    }
+
+    if (/[A-Z]/.test(pass)) score += 1;
+    if (/[a-z]/.test(pass)) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+
+    if (score < 3 && !feedback) {
+      feedback = "Consider adding numbers, symbols, or mixed case letters";
+    } else if (score >= 3 && score < 5) {
+      feedback = "Good password";
+    } else if (score === 5) {
+      feedback = "Strong password";
+    }
+
+    setPasswordStrength({ score, feedback });
+  };
+
+  const handlePasswordChange = (e) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    checkPasswordStrength(newPassword);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,7 +119,32 @@ export default function AuthScreen() {
     try {
       let response;
       
+      // Handle admin login
+      if (isAdminLogin) {
+        // Admin credentials check - hardcoded for this example
+        if (email === "admin@mindharmony.com" && password === "admin1234") {
+          // Set admin token in localStorage
+          localStorage.setItem('adminToken', 'admin-jwt-token-example');
+          localStorage.setItem('adminUser', JSON.stringify({
+            id: "admin_1",
+            name: "Admin",
+            email: "admin@mindharmony.com"
+          }));
+          
+          router.push("/admin");
+          return;
+        } else {
+          throw new Error("Invalid admin credentials");
+        }
+      }
+      
+      // Regular user flow
       if (authMode === "signup") {
+        // Password strength validation
+        if (passwordStrength.score < 3) {
+          throw new Error("Please create a stronger password: " + passwordStrength.feedback);
+        }
+        
         response = await authService.register({
           name: username,
           email,
@@ -95,7 +167,7 @@ export default function AuthScreen() {
         
         // Add timeout to handle potential API issues
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("Request timed out. Please try again.")), 10000);
+          setTimeout(() => reject(new Error("Request timed out. Please try again.")), 100000);
         });
         
         response = await Promise.race([loginPromise, timeoutPromise]);
@@ -127,11 +199,25 @@ export default function AuthScreen() {
 
   const toggleAuthMode = () => {
     setAuthMode(authMode === "signup" ? "signin" : "signup");
+    setIsAdminLogin(false);
+    setError("");
+  };
+
+  const toggleAdminLogin = () => {
+    setIsAdminLogin(!isAdminLogin);
+    setAuthMode("signin");
     setError("");
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const getStrengthColor = () => {
+    const { score } = passwordStrength;
+    if (score <= 1) return "bg-red-500";
+    if (score <= 3) return "bg-yellow-500";
+    return "bg-green-500";
   };
 
   return (
@@ -168,33 +254,46 @@ export default function AuthScreen() {
             </div>
 
             <motion.div 
-              className="p-6 shadow-xl sm:p-8 bg-slate-700 rounded-xl backdrop-blur-sm bg-opacity-95"
+              className={`p-6 shadow-xl sm:p-8 ${isAdminLogin ? 'bg-slate-800' : 'bg-slate-700'} rounded-xl backdrop-blur-sm bg-opacity-95`}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <div className="flex mb-6">
-                <button
-                  onClick={() => setAuthMode("signup")}
-                  className={`w-1/2 py-2 text-center transition-all duration-300 ${
-                    authMode === "signup"
-                      ? "text-emerald-300 border-b-2 border-emerald-400 font-medium"
-                      : "text-slate-400 hover:text-slate-300"
-                  }`}
-                >
-                  Sign Up
-                </button>
-                <button
-                  onClick={() => setAuthMode("signin")}
-                  className={`w-1/2 py-2 text-center transition-all duration-300 ${
-                    authMode === "signin"
-                      ? "text-emerald-300 border-b-2 border-emerald-400 font-medium"
-                      : "text-slate-400 hover:text-slate-300"
-                  }`}
-                >
-                  Sign In
-                </button>
-              </div>
+              {isAdminLogin ? (
+                <div className="mb-6">
+                  <div className="flex items-center justify-center p-2 mb-4 border border-purple-500 border-dashed rounded-md bg-slate-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v-1l1-1 1-1-.257-.257A6 6 0 1118 8zm-6-4a1 1 0 100 2h2a1 1 0 100-2h-2z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-sm font-medium text-purple-300">Admin Portal</span>
+                  </div>
+                  <h2 className="mb-1 text-2xl font-bold text-center text-white">Administrator Login</h2>
+                  <p className="text-sm text-center text-slate-400">Access the admin control panel</p>
+                </div>
+              ) : (
+                <div className="flex mb-6">
+                  <button
+                    onClick={() => setAuthMode("signup")}
+                    className={`w-1/2 py-2 text-center transition-all duration-300 ${
+                      authMode === "signup"
+                        ? "text-emerald-300 border-b-2 border-emerald-400 font-medium"
+                        : "text-slate-400 hover:text-slate-300"
+                    }`}
+                  >
+                    Sign Up
+                  </button>
+                  <button
+                    onClick={() => setAuthMode("signin")}
+                    className={`w-1/2 py-2 text-center transition-all duration-300 ${
+                      authMode === "signin"
+                        ? "text-emerald-300 border-b-2 border-emerald-400 font-medium"
+                        : "text-slate-400 hover:text-slate-300"
+                    }`}
+                  >
+                    Sign In
+                  </button>
+                </div>
+              )}
 
               {/* Success Message */}
               <AnimatePresence>
@@ -225,7 +324,7 @@ export default function AuthScreen() {
 
               <AnimatePresence mode="wait">
                 <motion.form
-                  key={authMode}
+                  key={`${authMode}-${isAdminLogin}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -233,7 +332,7 @@ export default function AuthScreen() {
                   onSubmit={handleSubmit}
                   className="space-y-4"
                 >
-                  {authMode === "signup" && (
+                  {authMode === "signup" && !isAdminLogin && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
@@ -256,15 +355,24 @@ export default function AuthScreen() {
 
                   <div>
                     <label className="block mb-1 text-sm font-medium text-slate-300">
-                      {authMode === "signup" ? "Username" : "Email"}
+                      {isAdminLogin 
+                        ? "Admin Email" 
+                        : (authMode === "signup" ? "Username" : "Email")}
                     </label>
                     <input
-                      type={authMode === "signin" ? "email" : "text"}
+                      type={isAdminLogin || authMode === "signin" ? "email" : "text"}
                       required
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="w-full px-4 py-3 transition-all duration-300 border rounded-lg bg-slate-800 text-slate-200 border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder-slate-500"
-                      placeholder={authMode === "signup" ? "johndoe" : "your@email.com"}
+                      value={isAdminLogin ? email : username}
+                      onChange={(e) => isAdminLogin ? setEmail(e.target.value) : setUsername(e.target.value)}
+                      className={`w-full px-4 py-3 transition-all duration-300 border rounded-lg 
+                        ${isAdminLogin 
+                          ? "bg-slate-900 border-purple-600 focus:ring-purple-500" 
+                          : "bg-slate-800 border-slate-600 focus:ring-emerald-500"
+                        } 
+                        text-slate-200 focus:outline-none focus:ring-2 focus:border-transparent placeholder-slate-500`}
+                      placeholder={isAdminLogin 
+                        ? "admin@mindharmony.com" 
+                        : (authMode === "signup" ? "johndoe" : "your@email.com")}
                     />
                   </div>
 
@@ -277,8 +385,13 @@ export default function AuthScreen() {
                         type={showPassword ? "text" : "password"}
                         required
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-3 transition-all duration-300 border rounded-lg bg-slate-800 text-slate-200 border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder-slate-500"
+                        onChange={handlePasswordChange}
+                        className={`w-full px-4 py-3 transition-all duration-300 border rounded-lg 
+                          ${isAdminLogin 
+                            ? "bg-slate-900 border-purple-600 focus:ring-purple-500" 
+                            : "bg-slate-800 border-slate-600 focus:ring-emerald-500"
+                          } 
+                          text-slate-200 focus:outline-none focus:ring-2 focus:border-transparent placeholder-slate-500`}
                         placeholder="••••••••"
                       />
                       <button 
@@ -299,6 +412,21 @@ export default function AuthScreen() {
                         )}
                       </button>
                     </div>
+
+                    {/* Password strength meter (only display during signup) */}
+                    {authMode === "signup" && !isAdminLogin && password && (
+                      <div className="mt-2">
+                        <div className="flex h-1 overflow-hidden rounded bg-slate-600">
+                          <div 
+                            className={`${getStrengthColor()} transition-all duration-300`} 
+                            style={{ width: `${passwordStrength.score * 20}%` }}
+                          ></div>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-400">
+                          {passwordStrength.feedback}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <motion.button
@@ -309,7 +437,9 @@ export default function AuthScreen() {
                     className={`flex items-center justify-center w-full px-4 py-3 text-white transition-all duration-300 rounded-lg shadow-md ${
                       isLoading || disableButton 
                         ? "bg-slate-500 cursor-not-allowed" 
-                        : "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-lg"
+                        : isAdminLogin
+                          ? "bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 hover:shadow-lg"
+                          : "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-lg"
                     }`}
                   >
                     {isLoading ? (
@@ -329,21 +459,50 @@ export default function AuthScreen() {
                         ></path>
                       </svg>
                     ) : null}
-                    {authMode === "signup" ? "Create Account" : "Sign In"}
+                    {isAdminLogin 
+                      ? "Admin Login" 
+                      : (authMode === "signup" ? "Create Account" : "Sign In")}
                   </motion.button>
 
                   <div className="mt-4 text-sm text-center text-slate-300">
-                    {authMode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
-                    <button
-                      type="button"
-                      onClick={toggleAuthMode}
-                      className="font-medium transition-colors text-emerald-300 hover:text-emerald-400"
-                    >
-                      {authMode === "signup" ? "Sign In" : "Sign Up"}
-                    </button>
+                    {isAdminLogin ? (
+                      <button
+                        type="button"
+                        onClick={toggleAdminLogin}
+                        className="font-medium text-purple-300 transition-colors hover:text-purple-400"
+                      >
+                        Back to User Login
+                      </button>
+                    ) : (
+                      <>
+                        {authMode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
+                        <button
+                          type="button"
+                          onClick={toggleAuthMode}
+                          className="font-medium transition-colors text-emerald-300 hover:text-emerald-400"
+                        >
+                          {authMode === "signup" ? "Sign In" : "Sign Up"}
+                        </button>
+                      </>
+                    )}
                   </div>
                 </motion.form>
               </AnimatePresence>
+
+              {/* Admin login toggle (only show on signin screen) */}
+              {!isAdminLogin && authMode === "signin" && (
+                <div className="pt-4 mt-4 text-xs text-center border-t border-slate-600">
+                  <button
+                    onClick={toggleAdminLogin}
+                    className="inline-flex items-center font-medium transition-colors text-slate-400 hover:text-purple-300"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                    </svg>
+                    Administrator Access
+                  </button>
+                </div>
+              )}
             </motion.div>
 
             <div className="mt-4 text-xs text-center sm:mt-6 sm:text-sm text-slate-500">
@@ -400,7 +559,7 @@ export default function AuthScreen() {
                   {mentalHealthQuotes[currentQuote]}
                 </motion.h2>
                 <p className="max-w-md mx-auto text-lg text-emerald-100">
-                  Join thousands of people who have found peace and balance with MindHarmony..
+                  Join thousands of people who have found peace and balance with MindHarmony.
                 </p>
               </motion.div>
             </AnimatePresence>
