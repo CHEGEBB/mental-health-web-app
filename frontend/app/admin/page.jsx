@@ -858,7 +858,7 @@ export default function AdminDashboard() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-purple-100">Today's Sessions</p>
+                  <p className="text-sm font-medium text-purple-100">Today&apos;s Sessions</p>
                   <h3 className="text-2xl font-bold text-white">{statsData.therapySessionsToday}</h3>
                 </div>
                 <div className="p-2 bg-white rounded-lg bg-opacity-20">
