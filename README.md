@@ -1,5 +1,7 @@
 # MindHarmony - Mental Health Support Platform
 
+Live link ➡️ [https://mindharmony.vercel.app/]
+
 ## Project Overview
 
 MindHarmony is a comprehensive mental health support platform designed to help users track their emotional wellbeing, gain insights into their mental health patterns, access helpful resources, connect with professionals, and engage with a supportive community. The platform focuses on mood tracking, personalized insights, and community support features.
